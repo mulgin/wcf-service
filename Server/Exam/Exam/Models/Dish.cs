@@ -15,9 +15,9 @@ namespace Exam.Models
         public decimal Price { get; private set; }
         [DataMember]
         public string TotalAmount { get; private set; }
+        [DataMember]
+        public List<Ingredient> Ingredients { get; private set; }
 
-
-        private List<Ingredient> _ingredients;
         private SqlConnection _sqlConnection;
 
         public Dish() { }
@@ -28,6 +28,8 @@ namespace Exam.Models
             Name = name;
             Price = price;
             TotalAmount = totalAmount;
+
+            Ingredients = new List<Ingredient>();
             _sqlConnection = new SqlConnection(connectionString);
             _sqlConnection.Open();
 
@@ -63,6 +65,31 @@ namespace Exam.Models
             return result;
         }
 
+        /// <summary>
+        /// Add a new Dish.
+        /// </summary>
+        /// <param name="newDish">A new Dish</param>
+        public static void AddDish(Dish newDish, SqlConnection connection)
+        {
+            SqlCommand sqlCommand = new SqlCommand(
+                $"INSERT INTO Dishes VALUES ('{newDish.Name}', '{newDish.Price}', '{newDish.TotalAmount}')",
+                connection);
+            sqlCommand.ExecuteReader();
+
+            foreach (Ingredient ingredient in newDish.Ingredients)
+            {
+                sqlCommand = new SqlCommand(
+                $"INSERT INTO Ingredients VALUES ('{newDish.Name}')",
+                connection);
+                sqlCommand.ExecuteReader();
+            }
+
+            sqlCommand = new SqlCommand(
+                $"INSERT INTO Recipes VALUES ('{newDish.Id}')",
+                connection);
+            sqlCommand.ExecuteReader();
+        }
+
 
         /// <summary>
         /// Get all ingredients for current dish.
@@ -70,9 +97,17 @@ namespace Exam.Models
         private void initIngredients()
         {
             SqlCommand sqlCommand = new SqlCommand(
-                $"SELECT Ingredients.Name FROM Dishes JOIN Recipes ON Dishes.Id = Dish_Id JOIN Ingredients ON Ingredients.Id = Ingredient_Id WHERE Dishes.Id = {Id}", 
+                $"SELECT Ingredients.Id, Ingredients.Name FROM Dishes JOIN Recipes ON Dishes.Id = Dish_Id JOIN Ingredients ON Ingredients.Id = Ingredient_Id WHERE Dishes.Id = {Id}",
                 _sqlConnection);
-            SqlDataReader reader = sqlCommand.ExecuteReader();            
+            SqlDataReader reader = sqlCommand.ExecuteReader();
+
+            while (reader.Read())
+            {
+                int id = (int)reader.GetValue(0);
+                string name = (string)reader.GetValue(1);
+
+                Ingredients.Add(new Ingredient(id, name));
+            }
         }
     }
 }

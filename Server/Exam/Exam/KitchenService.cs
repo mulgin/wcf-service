@@ -1,6 +1,7 @@
 ﻿using Exam.Models;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System;
 
 namespace Exam
 {
@@ -21,11 +22,16 @@ namespace Exam
 
         ~KitchenService()
         {
+            // TODO: find out why it isn't work.
             //_sqlConnection.Close();
         }
 
+        public void AddDish(Dish newDish)
+        {
+            Dish.AddDish(newDish, _sqlConnection);
+        }
 
-        public List<Dish> getAllDishes()
+        public List<Dish> GetAllDishes()
         {
             return Dish.getAllDishes(_sqlConnection, CONNSTR);
         }

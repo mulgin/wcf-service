@@ -8,8 +8,9 @@ namespace Exam
     public interface IKitchenService
     {
         [OperationContract]
-        List<Dish> getAllDishes();
+        List<Dish> GetAllDishes();
 
-        
+        [OperationContract]
+        void AddDish(Dish newDish);
     }
 }
