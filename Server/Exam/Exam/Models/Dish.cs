@@ -8,8 +8,6 @@ namespace Exam.Models
     public class Dish
     {
         [DataMember]
-        public int Id { get; private set; }
-        [DataMember]
         public string Name { get; private set; }
         [DataMember]
         public decimal Price { get; private set; }
@@ -22,9 +20,8 @@ namespace Exam.Models
 
         public Dish() { }
 
-        public Dish(int id, string name, decimal price, string totalAmount, string connectionString)
+        public Dish(string name, decimal price, string totalAmount, string connectionString)
         {
-            Id = id;
             Name = name;
             Price = price;
             TotalAmount = totalAmount;
@@ -52,12 +49,11 @@ namespace Exam.Models
 
             while (reader.Read())
             {
-                int id = (int)reader.GetValue(0);
-                string name = (string)reader.GetValue(1);
+                string name = (string)reader.GetValue(0);
+                string totalAmount = (string)reader.GetValue(1);
                 decimal price = (decimal)reader.GetValue(2);
-                string totalAmount = (string)reader.GetValue(3);
-
-                result.Add(new Dish(id, name, price, totalAmount, sqlConnStr));
+                
+                result.Add(new Dish(name, price, totalAmount, sqlConnStr));
             }
 
             reader.Close();
@@ -72,22 +68,22 @@ namespace Exam.Models
         public static void AddDish(Dish newDish, SqlConnection connection)
         {
             SqlCommand sqlCommand = new SqlCommand(
-                $"INSERT INTO Dishes VALUES ('{newDish.Name}', '{newDish.Price}', '{newDish.TotalAmount}')",
+                $"INSERT INTO Dishes VALUES ('{newDish.Name}', '{newDish.TotalAmount}', '{newDish.Price}')",
                 connection);
             sqlCommand.ExecuteReader();
 
             foreach (Ingredient ingredient in newDish.Ingredients)
             {
                 sqlCommand = new SqlCommand(
-                $"INSERT INTO Ingredients VALUES ('{newDish.Name}')",
+                $"INSERT INTO Ingredients VALUES ('{ingredient.Name}')",
+                connection);
+                sqlCommand.ExecuteReader();
+
+                sqlCommand = new SqlCommand(
+                $"INSERT INTO Recipes VALUES ('{newDish.Name}', '{ingredient.Name}', '{ingredient.Amount}')",
                 connection);
                 sqlCommand.ExecuteReader();
             }
-
-            sqlCommand = new SqlCommand(
-                $"INSERT INTO Recipes VALUES ('{newDish.Id}')",
-                connection);
-            sqlCommand.ExecuteReader();
         }
 
 
@@ -97,16 +93,16 @@ namespace Exam.Models
         private void initIngredients()
         {
             SqlCommand sqlCommand = new SqlCommand(
-                $"SELECT Ingredients.Id, Ingredients.Name FROM Dishes JOIN Recipes ON Dishes.Id = Dish_Id JOIN Ingredients ON Ingredients.Id = Ingredient_Id WHERE Dishes.Id = {Id}",
+                $"SELECT Ingredients.Name, Recipes.Amount FROM Dishes JOIN Recipes ON Dishes.Name = Dish_name JOIN Ingredients ON Ingredients.Name = Ingredient_name WHERE Dishes.Name = '{Name}'",
                 _sqlConnection);
             SqlDataReader reader = sqlCommand.ExecuteReader();
 
             while (reader.Read())
             {
-                int id = (int)reader.GetValue(0);
-                string name = (string)reader.GetValue(1);
+                string name = (string)reader.GetValue(0);
+                string amount = (string)reader.GetValue(1);
 
-                Ingredients.Add(new Ingredient(id, name));
+                Ingredients.Add(new Ingredient(name, amount));
             }
         }
     }

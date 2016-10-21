@@ -6,16 +6,16 @@ namespace Exam.Models
     public class Ingredient
     {
         [DataMember]
-        public int Id { get; private set; }
-        [DataMember]
         public string Name { get; private set; }
+        [DataMember]
+        public string Amount { get; private set; }
 
         public Ingredient() { }
 
-        public Ingredient(int id, string name)
+        public Ingredient(string name, string amount)
         {
-            Id = id;
             Name = name;
+            Amount = amount;
         }
     }
 }

@@ -9,8 +9,9 @@ namespace Exam
     {
         /// <summary>
         /// Connection string to database.
+        /// Here is have to be 'MultipleActiveResultSets=true' in the connection string.
         /// </summary>
-        private const string CONNSTR = "Data Source=server2;Initial Catalog=Restaurant;User ID=sa;Password=ghbvf";
+        private const string CONNSTR = "Data Source=localhost;Initial Catalog=Restaurant;Integrated Security=True; MultipleActiveResultSets=true";
 
         private SqlConnection _sqlConnection;
 
