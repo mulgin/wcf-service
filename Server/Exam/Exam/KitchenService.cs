@@ -26,9 +26,9 @@ namespace Exam
             //_sqlConnection.Close();
         }
 
-        public void AddDish(Dish newDish)
+        public bool AddDish(Dish newDish)
         {
-            Dish.AddDish(newDish, _sqlConnection);
+            return Dish.AddDish(newDish, _sqlConnection);
         }
 
         /// <summary>

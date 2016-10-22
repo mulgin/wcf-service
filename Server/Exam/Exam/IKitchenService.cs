@@ -11,7 +11,7 @@ namespace Exam
         List<Dish> GetAllDishes();
 
         [OperationContract]
-        void AddDish(Dish newDish);
+        bool AddDish(Dish newDish);
 
         [OperationContract]
         Dish GetDishByName(string name);
