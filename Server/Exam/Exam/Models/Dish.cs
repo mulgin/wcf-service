@@ -16,35 +16,32 @@ namespace Exam.Models
         [DataMember]
         public List<Ingredient> Ingredients { get; private set; }
 
-        private SqlConnection _sqlConnection;
+        private readonly SqlConnection _sqlConnection;
 
         public Dish() { }
 
-        public Dish(string name, decimal price, string totalAmount, string connectionString)
+        public Dish(string name, decimal price, string totalAmount, SqlConnection connection)
         {
             Name = name;
             Price = price;
             TotalAmount = totalAmount;
 
             Ingredients = new List<Ingredient>();
-            _sqlConnection = new SqlConnection(connectionString);
-            _sqlConnection.Open();
+            _sqlConnection = connection;
 
-            initIngredients();
-
-            _sqlConnection.Close();
+            InitIngredients();
         }
 
         /// <summary>
         /// Get all dishes form database.
         /// </summary>
-        /// <param name="conn"></param>
+        /// <param name="connection">Connection to the restaurant database</param>
         /// <returns></returns>
-        public static List<Dish> getAllDishes(SqlConnection conn, string sqlConnStr)
+        public static List<Dish> GetAllDishes(SqlConnection connection)
         {
             List<Dish> result = new List<Dish>();
 
-            SqlCommand sqlCommandAllDeshes = new SqlCommand("SELECT * FROM Dishes", conn);
+            SqlCommand sqlCommandAllDeshes = new SqlCommand("SELECT * FROM Dishes", connection);
             SqlDataReader reader = sqlCommandAllDeshes.ExecuteReader();
 
             while (reader.Read())
@@ -52,8 +49,8 @@ namespace Exam.Models
                 string name = (string)reader.GetValue(0);
                 string totalAmount = (string)reader.GetValue(1);
                 decimal price = (decimal)reader.GetValue(2);
-                
-                result.Add(new Dish(name, price, totalAmount, sqlConnStr));
+
+                result.Add(new Dish(name, price, totalAmount, connection));
             }
 
             reader.Close();
@@ -65,6 +62,7 @@ namespace Exam.Models
         /// Add a new Dish.
         /// </summary>
         /// <param name="newDish">A new Dish</param>
+        /// <param name="connection">Connection to the restaurant database.</param>
         public static void AddDish(Dish newDish, SqlConnection connection)
         {
             SqlCommand sqlCommand = new SqlCommand(
@@ -86,11 +84,31 @@ namespace Exam.Models
             }
         }
 
+        /// <summary>
+        /// Find Dish by name.
+        /// </summary>
+        /// <param name="dishName">A name</param>
+        /// <param name="connection">Connection to the restaurant database</param>
+        /// <returns>Finded Dish</returns>
+        public static Dish GetDishByName(string dishName, SqlConnection connection)
+        {
+            SqlCommand sqlCommand = new SqlCommand(
+                $"SELECT Dishes.Name, Dishes.Price, Dishes.TotalAmount FROM Dishes JOIN Recipes ON Dishes.Name = Dish_name JOIN Ingredients ON Ingredients.Name = Ingredient_name WHERE Dishes.Name = '{dishName}'",
+                connection);
+            SqlDataReader reader = sqlCommand.ExecuteReader();
+            reader.Read();
+
+            string name = (string)reader.GetValue(0);
+            decimal price = (decimal) reader.GetValue(1);
+            string amount = (string)reader.GetValue(2);
+
+            return new Dish(name, price, amount, connection);
+        }
 
         /// <summary>
         /// Get all ingredients for current dish.
         /// </summary>
-        private void initIngredients()
+        private void InitIngredients()
         {
             SqlCommand sqlCommand = new SqlCommand(
                 $"SELECT Ingredients.Name, Recipes.Amount FROM Dishes JOIN Recipes ON Dishes.Name = Dish_name JOIN Ingredients ON Ingredients.Name = Ingredient_name WHERE Dishes.Name = '{Name}'",

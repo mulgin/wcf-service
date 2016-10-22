@@ -12,5 +12,8 @@ namespace Exam
 
         [OperationContract]
         void AddDish(Dish newDish);
+
+        [OperationContract]
+        Dish GetDishByName(string name);
     }
 }
